@@ -1,109 +1,146 @@
 const calendarEl = document.getElementById("calendar");
-const timeEl = document.getElementById("time-selection");
+const timesEl = document.getElementById("times");
+const availabilityBar = document.getElementById("availability-bar");
 const clientInfoEl = document.getElementById("client-info");
-const confirmBtn = document.getElementById("confirm");
+let selectedDay = "";
+let selectedTime = "";
 
-const now = new Date();
-const horarios = [13, 14, 15, 16, 17, 18, 19];
-let selectedDate = null;
-let selectedTime = null;
-let agendados = {};
+const hours = ["13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"];
 
-function renderCalendar(year, month) {
-  calendarEl.innerHTML = "";
-  const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
+function getStoredReservations() {
+    return JSON.parse(localStorage.getItem("reservations")) || {};
+}
 
-  const tituloMes = new Date(year, month).toLocaleDateString('pt-BR', {
-    month: 'long',
-    year: 'numeric'
-  });
+function updateAvailabilityBar(day, totalHours) {
+    const booked = getStoredReservations()[day]?.length || 0;
+    const available = totalHours - booked;
+    const widthPercentage = (available / totalHours) * 100;
+    availabilityBar.innerHTML = `<div class="bar" style="width: ${widthPercentage}%"></div>`;
+}
 
-  const titulo = document.createElement('h2');
-  titulo.textContent = tituloMes;
-  calendarEl.appendChild(titulo);
+function createCalendar() {
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const currentMonth = today.getMonth();
+    
+    const monthDays = new Date(currentYear, currentMonth + 1, 0).getDate();
 
-  diasSemana.forEach(dia => {
-    const el = document.createElement('div');
-    el.textContent = dia;
-    el.className = 'date';
-    el.style.fontWeight = 'bold';
-    calendarEl.appendChild(el);
-  });
+    const daysOfWeek = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sab"];
+    daysOfWeek.forEach(day => {
+        const headerEl = document.createElement("div");
+        headerEl.className = "calendar-day-header";
+        headerEl.innerText = day;
+        calendarEl.appendChild(headerEl);
+    });
 
-  const primeiroDia = new Date(year, month, 1).getDay();
-  const diasNoMes = new Date(year, month + 1, 0).getDate();
+    const todayISO = today.toISOString().split("T")[0]; 
 
-  for (let i = 0; i < primeiroDia; i++) {
-    const vazio = document.createElement('div');
-    vazio.className = 'date';
-    vazio.style.visibility = 'hidden';
-    calendarEl.appendChild(vazio);
-  }
+    for (let i = 1; i <= monthDays; i++) {
+        const date = new Date(currentYear, currentMonth, i);
+        const dayKey = date.toISOString().split("T")[0];
 
-  for (let dia = 1; dia <= diasNoMes; dia++) {
-    const data = new Date(year, month, dia);
-    const diaEl = document.createElement('div');
-    diaEl.textContent = dia;
-    diaEl.className = 'date';
+        const dayEl = document.createElement("div");
+        dayEl.className = "calendar-day";
+        dayEl.innerText = i;
 
-    if (data < new Date(now.toDateString())) {
-      diaEl.classList.add('disabled');
-    } else {
-      diaEl.addEventListener('click', () => selectDate(data, diaEl));
+        if (dayKey < todayISO) {
+            dayEl.classList.add("disabled");
+        } else {
+            dayEl.onclick = () => showTimes(dayKey);
+        }
+
+        calendarEl.appendChild(dayEl);
     }
-    calendarEl.appendChild(diaEl);
-  }
 }
 
-function selectDate(data, el) {
-  selectedDate = data;
-  [...document.querySelectorAll('.date')].forEach(el => el.classList.remove('selected'));
-  el.classList.add('selected');
+function showTimes(day) {
+    selectedDay = day;
+    timesEl.innerHTML = "";
+    clientInfoEl.style.display = "none";
+    const reservations = getStoredReservations();
+    const bookedTimes = reservations[day] || [];
 
-  timeEl.innerHTML = '';
-  timeEl.classList.remove('hidden');
-  clientInfoEl.classList.add('hidden');
+    const today = new Date();
+    const selectedDate = new Date(day);
+    const currentTime = today.getHours();
 
-  horarios.forEach(h => {
-    const timeSlot = document.createElement('div');
-    timeSlot.textContent = `${h}h`;
-    timeSlot.className = 'time-slot';
+    hours.forEach(hour => {
+        const timeEl = document.createElement("div");
+        timeEl.className = "time";
+        timeEl.innerText = hour;
 
-    const jaPassou = data.toDateString() === now.toDateString() && h <= now.getHours();
-    const jaAgendado = agendados[`${data.toDateString()}-${h}`];
+        const [hourNum] = hour.split(":").map(Number);
+        if (selectedDate.toISOString().split("T")[0] === today.toISOString().split("T")[0] && hourNum < currentTime) {
+            timeEl.classList.add("disabled");
+        }
 
-    if (jaPassou || jaAgendado) {
-      timeSlot.classList.add('disabled');
-    } else {
-      timeSlot.addEventListener('click', () => selectTime(h, timeSlot));
+        if (bookedTimes.includes(hour)) {
+            timeEl.classList.add("disabled");
+        } else {
+            timeEl.onclick = () => selectTime(day, hour);
+        }
+
+        timesEl.appendChild(timeEl);
+    });
+
+    updateAvailabilityBar(day, hours.length);
+}
+
+function selectTime(day, hour) {
+    selectedTime = hour;
+    clientInfoEl.style.display = "block";
+}
+
+function sendWhatsApp() {
+    const name = document.getElementById("clientName").value;
+    const phone = document.getElementById("clientPhone").value;
+    const assinatura = document.getElementById("assinatura").value;
+
+    const checkboxes = [
+        { id: "temAlergia", label: "Alergia a produto" },
+        { id: "condicaoOcular", label: "Condição ocular" },
+        { id: "gravidez", label: "Gestante/Lactante" },
+        { id: "lentes", label: "Usa lentes de contato" },
+        { id: "fezProcedimento", label: "Fez procedimento recente" },
+        { id: "leuCuidados", label: "Leu os cuidados pós" },
+        { id: "autorizo", label: "Autorizou o procedimento" }
+    ];
+
+    if (!name || !phone || !assinatura) {
+        alert("Por favor, preencha todos os campos obrigatórios.");
+        return;
     }
 
-    timeEl.appendChild(timeSlot);
-  });
+    for (const box of checkboxes) {
+        const checkbox = document.getElementById(box.id);
+        if (!checkbox.checked) {
+            alert(`Marque: ${box.label}`);
+            return;
+        }
+    }
+
+    let reservations = getStoredReservations();
+    if (!reservations[selectedDay]) {
+        reservations[selectedDay] = [];
+    }
+
+    if (!reservations[selectedDay].includes(selectedTime)) {
+        reservations[selectedDay].push(selectedTime);
+        localStorage.setItem("reservations", JSON.stringify(reservations));
+    }
+
+    let message = `Olá, meu nome é ${name}.\nAgendei um horário no dia ${selectedDay} às ${selectedTime}.\n\n`;
+    message += `Ficha de Anamnese:\n`;
+
+    checkboxes.forEach(box => {
+        const checked = document.getElementById(box.id).checked ? "Sim" : "Não";
+        message += `- ${box.label}: ${checked}\n`;
+    });
+
+    message += `\nAssinatura digital: ${assinatura}`;
+
+    const whatsappURL = `https://wa.me/5511997572290?text=${encodeURIComponent(message)}`;
+    window.open(whatsappURL, "_blank");
 }
 
-function selectTime(hora, el) {
-  selectedTime = hora;
-  [...document.querySelectorAll('.time-slot')].forEach(e => e.classList.remove('selected'));
-  el.classList.add('selected');
-  clientInfoEl.classList.remove('hidden');
-}
-
-confirmBtn.addEventListener('click', () => {
-  const nome = document.getElementById("client-name").value;
-  const telefone = document.getElementById("client-phone").value;
-
-  if (!nome || !telefone) {
-    alert("Por favor, preencha todos os campos.");
-    return;
-  }
-
-  const dia = selectedDate.toLocaleDateString('pt-BR');
-  const msg = `Olá, meu nome é ${nome}. Agendei um horário no dia ${dia} às ${selectedTime}h`;
-  agendados[`${selectedDate.toDateString()}-${selectedTime}`] = true;
-
-  const url = `https://wa.me/5511997572290?text=${encodeURIComponent(msg)}`;
-  window.location.href = url;
-});
-
-renderCalendar(now.getFullYear(), now.getMonth());
+createCalendar();
