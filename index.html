@@ -1,22 +1,45 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Agendamento de Cílios</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendamento Lash Designer</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-  <div class="container">
-    <h1>Agendamento de Cílios</h1>
-    <div id="calendar"></div>
-    <div id="time-selection" class="hidden"></div>
-    <div id="client-info" class="hidden">
-      <input type="text" id="client-name" placeholder="Nome completo" required />
-      <input type="tel" id="client-phone" placeholder="Telefone (Ex: 11 91234-5678)" required />
-      <button id="confirm">Confirmar</button>
+    <div class="container">
+        <h2>Agendamento de Cílios</h2>
+        <p>Selecione um dia para ver os horários disponíveis:</p>
+        <div class="calendar" id="calendar"></div>
+        <div id="availability-bar"></div>
+        <div class="times" id="times"></div>
+
+        <div id="client-info" class="hidden">
+            <h3>Finalize seu agendamento</h3>
+            <label for="clientName"><i class="fas fa-user"></i> Nome:</label>
+            <input type="text" id="clientName" placeholder="Digite seu nome" required>
+
+            <label for="clientPhone"><i class="fas fa-phone"></i> WhatsApp:</label>
+            <input type="tel" id="clientPhone" placeholder="(XX) XXXXX-XXXX" required>
+
+            <!-- Ficha de Anamnese -->
+            <h4>Ficha de Anamnese Lash Lifting</h4>
+            <label><input type="checkbox" id="temAlergia"> Possui alergia a algum produto?</label><br>
+            <label><input type="checkbox" id="condicaoOcular"> Possui alguma condição ocular?</label><br>
+            <label><input type="checkbox" id="gravidez"> Está gestante ou lactante?</label><br>
+            <label><input type="checkbox" id="lentes"> Usa lentes de contato?</label><br>
+            <label><input type="checkbox" id="fezProcedimento"> Já fez lifting ou alongamento nos últimos 30 dias?</label><br>
+            <label><input type="checkbox" id="leuCuidados"> Estou ciente dos cuidados pós-procedimento.</label><br>
+            <label><input type="checkbox" id="autorizo"> Autorizo a realização do procedimento e estou ciente dos riscos.</label><br>
+
+            <label for="assinatura"><i class="fas fa-signature"></i> Assinatura digital (Digite seu nome completo):</label>
+            <input type="text" id="assinatura" placeholder="Digite seu nome como assinatura" required>
+
+            <button onclick="sendWhatsApp()"><i class="fab fa-whatsapp"></i> Confirmar e Enviar WhatsApp</button>
+        </div>
     </div>
-  </div>
-  <script src="script.js"></script>
+
+    <script src="script.js" defer></script>
 </body>
 </html>
