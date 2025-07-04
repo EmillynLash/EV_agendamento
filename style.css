@@ -1,92 +1,156 @@
 body {
-  font-family: Arial, sans-serif;
-  background-color: #fff0f5;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
+    font-family: 'Poppins', sans-serif;
+    background: #fff;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
 }
 
 .container {
-  background-color: white;
-  padding: 20px;
-  border-radius: 20px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  width: 90%;
-  max-width: 600px;
+    background: #f5f5f5;
+    border-radius: 13px;
+    padding: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    width: 90%;
+    max-width: 350px;
+    text-align: center;
+    border: 2px solid #f06292;
 }
 
-h1 {
-  text-align: center;
-  color: #d63384;
-  margin-bottom: 20px;
+h2 {
+    color: #f06292;
+    font-size: 20px;
+    margin-bottom: 15px;
 }
 
-#calendar, #time-selection, #client-info {
-  margin-top: 20px;
+.calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    margin-bottom: 10px;
 }
 
-button, input[type="text"], input[type="tel"] {
-  width: 100%;
-  padding: 10px;
-  margin-top: 10px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  font-size: 16px;
+.calendar-day {
+    background: #fff;
+    color: #f06292;
+    border: 2px solid #f06292;
+    padding: 8px;
+    margin: 2px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: 0.3s;
+    text-align: center;
+    font-size: 10px;
+}
+
+.calendar-day:hover {
+    background: #f8bbd0;
+    transform: scale(1.1);
+}
+
+.calendar-day.disabled {
+    background: #e0e0e0;
+    color: #bdbdbd;
+    cursor: not-allowed;
+}
+
+.calendar-day-header {
+    background: #fff;
+    color: #f06292;
+    font-weight: bold;
+    text-align: center;
+    padding: 3px;
+    font-size: 9px;
+}
+
+.time {
+    background: #f8bbd0;
+    color: #f06292;
+    padding: 8px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+    font-size: 14px;
+    margin: 2px;
+}
+
+.time:hover {
+    background: #f06292;
+    color: white;
+    transform: scale(1.05);
+}
+
+.time.disabled {
+    background: #e0e0e0;
+    color: #bdbdbd;
+    cursor: not-allowed;
+}
+
+input, button {
+    width: 100%;
+    padding: 8px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    transition: 0.3s;
 }
 
 button {
-  background-color: #d63384;
-  color: white;
-  border: none;
-  cursor: pointer;
+    background: #f06292;
+    color: white;
+    cursor: pointer;
 }
 
 button:hover {
-  background-color: #b82c6e;
+    background: #e91e63;
+    transform: scale(1.05);
 }
 
-#calendar {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 5px;
+#availability-bar {
+    height: 6px;
+    width: 100%;
+    background-color: #e0e0e0;
+    margin-bottom: 15px;
 }
 
-.date, .time-slot {
-  padding: 10px;
-  border-radius: 10px;
-  background-color: #ffe6f0;
-  cursor: pointer;
-  border: 1px solid #d63384;
-  text-align: center;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.date.disabled, .time-slot.disabled {
-  background-color: #ddd;
-  cursor: not-allowed;
-}
-
-.date.selected, .time-slot.selected {
-  background-color: #d63384;
-  color: white;
-  font-weight: bold;
+.bar {
+    height: 100%;
+    background-color: #f06292;
 }
 
 .hidden {
-  display: none;
+    display: none;
 }
 
-@media (max-width: 600px) {
-  #calendar {
-    grid-template-columns: repeat(4, 1fr);
-  }
+@media (max-width: 400px) {
+    .container {
+        width: 95%;
+        max-width: 320px;
+    }
 
-  .date, .time-slot {
-    font-size: 14px;
-    padding: 8px;
-  }
+    .calendar-day {
+        width: 30px;
+        height: 30px;
+        line-height: 30px;
+        font-size: 12px;
+    }
+
+    .calendar-day-header {
+        font-size: 10px;
+    }
+
+    .time {
+        font-size: 12px;
+        padding: 6px;
+    }
+
+    input[type="text"],
+    input[type="tel"] {
+        width: 100%;
+        font-size: 14px;
+    }
 }
