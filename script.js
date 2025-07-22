@@ -22,10 +22,10 @@ function createCalendar() {
     const today = new Date();
     const currentYear = today.getFullYear();
     const currentMonth = today.getMonth();
-    
     const monthDays = new Date(currentYear, currentMonth + 1, 0).getDate();
 
     const daysOfWeek = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sab"];
+    calendarEl.innerHTML = "";
     daysOfWeek.forEach(day => {
         const headerEl = document.createElement("div");
         headerEl.className = "calendar-day-header";
@@ -33,7 +33,14 @@ function createCalendar() {
         calendarEl.appendChild(headerEl);
     });
 
-    const todayISO = today.toISOString().split("T")[0]; 
+    const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+    const todayISO = today.toISOString().split("T")[0];
+
+    for (let i = 0; i < firstDay; i++) {
+        const emptyEl = document.createElement("div");
+        emptyEl.className = "calendar-day empty";
+        calendarEl.appendChild(emptyEl);
+    }
 
     for (let i = 1; i <= monthDays; i++) {
         const date = new Date(currentYear, currentMonth, i);
@@ -57,6 +64,7 @@ function showTimes(day) {
     selectedDay = day;
     timesEl.innerHTML = "";
     clientInfoEl.style.display = "none";
+    document.getElementById("anamnese").style.display = "none";
     const reservations = getStoredReservations();
     const bookedTimes = reservations[day] || [];
 
@@ -89,34 +97,32 @@ function showTimes(day) {
 function selectTime(day, hour) {
     selectedTime = hour;
     clientInfoEl.style.display = "block";
+    document.getElementById("anamnese").style.display = "block";
 }
+
+document.getElementById("anamneseForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const assinatura = document.getElementById("assinatura").value.trim();
+    const aceite = document.getElementById("aceiteTermos").checked;
+
+    if (!assinatura || !aceite) {
+        alert("Por favor, preencha seu nome completo e aceite os termos da LGPD.");
+        return;
+    }
+
+    alert("Ficha de anamnese preenchida com sucesso! Agora finalize o envio no botão do WhatsApp.");
+});
 
 function sendWhatsApp() {
     const name = document.getElementById("clientName").value;
     const phone = document.getElementById("clientPhone").value;
-    const assinatura = document.getElementById("assinatura").value;
+    const assinatura = document.getElementById("assinatura").value.trim();
+    const aceite = document.getElementById("aceiteTermos").checked;
 
-    const checkboxes = [
-        { id: "temAlergia", label: "Alergia a produto" },
-        { id: "condicaoOcular", label: "Condição ocular" },
-        { id: "gravidez", label: "Gestante/Lactante" },
-        { id: "lentes", label: "Usa lentes de contato" },
-        { id: "fezProcedimento", label: "Fez procedimento recente" },
-        { id: "leuCuidados", label: "Leu os cuidados pós" },
-        { id: "autorizo", label: "Autorizou o procedimento" }
-    ];
-
-    if (!name || !phone || !assinatura) {
-        alert("Por favor, preencha todos os campos obrigatórios.");
+    if (!name || !phone || !assinatura || !aceite) {
+        alert("Por favor, preencha todos os dados e aceite os termos.");
         return;
-    }
-
-    for (const box of checkboxes) {
-        const checkbox = document.getElementById(box.id);
-        if (!checkbox.checked) {
-            alert(`Marque: ${box.label}`);
-            return;
-        }
     }
 
     let reservations = getStoredReservations();
@@ -129,16 +135,7 @@ function sendWhatsApp() {
         localStorage.setItem("reservations", JSON.stringify(reservations));
     }
 
-    let message = `Olá, meu nome é ${name}.\nAgendei um horário no dia ${selectedDay} às ${selectedTime}.\n\n`;
-    message += `Ficha de Anamnese:\n`;
-
-    checkboxes.forEach(box => {
-        const checked = document.getElementById(box.id).checked ? "Sim" : "Não";
-        message += `- ${box.label}: ${checked}\n`;
-    });
-
-    message += `\nAssinatura digital: ${assinatura}`;
-
+    const message = `Olá, meu nome é ${name}. Agendei um horário no dia ${selectedDay} às ${selectedTime}.\n\nAssinei a ficha de anamnese como: ${assinatura}.`;
     const whatsappURL = `https://wa.me/5511997572290?text=${encodeURIComponent(message)}`;
     window.open(whatsappURL, "_blank");
 }
